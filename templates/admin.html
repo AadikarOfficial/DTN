@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sarkar Digital — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0C14;--panel:#10131F;--card:#161A2E;--card2:#1D2140;--border:rgba(255,255,255,0.07);--accent:#C0152A;--blue:#003893;--gold:#E8B84B;--green:#22C55E;--orange:#F97316;--red:#EF4444;--white:#F0EDE8;--muted:#6B7190;--text:#D4D0CC;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;display:flex;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:rgba(192,21,42,0.5);border-radius:3px;}
+.sidebar{width:240px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;}
+.sb-brand{padding:22px 20px 14px;border-bottom:1px solid var(--border);}
+.sb-brand .t{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--white);}
+.sb-brand .s{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+.sb-user{padding:10px 20px;border-bottom:1px solid var(--border);}
+.sb-user .role{font-size:10px;color:var(--gold);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;}
+.sb-user .name{color:var(--white);font-weight:500;font-size:13px;margin-top:2px;}
+.nav-sec{padding:14px 20px 5px;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.15s;}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.04);}
+.nav-item.active{color:var(--white);border-left-color:var(--accent);background:rgba(192,21,42,0.08);}
+.nav-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;}
+.sb-bot{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border);}
+.logout-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-size:12px;font-family:'IBM Plex Mono',monospace;transition:all 0.15s;}
+.logout-btn:hover{border-color:var(--accent);color:var(--accent);}
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{padding:14px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--panel);position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Fraunces',serif;font-size:18px;color:var(--white);}
+.content{padding:26px 32px;flex:1;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.stat-val{font-size:30px;font-weight:700;font-family:'Fraunces',serif;color:var(--white);}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;font-family:'IBM Plex Mono',monospace;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px;}
+.panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.panel-title{font-size:14px;font-weight:600;color:var(--white);}
+.panel-body{padding:18px;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-weight:500;}
+.data-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.04em;font-weight:500;}
+.badge-pending{background:rgba(232,184,75,0.15);color:var(--gold);border:1px solid rgba(232,184,75,0.3);}
+.badge-approved{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.badge-rejected{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+.badge-open{background:rgba(192,21,42,0.15);color:#ff6b7a;border:1px solid rgba(192,21,42,0.4);}
+.badge-upcoming{background:rgba(232,184,75,0.12);color:var(--gold);border:1px solid rgba(232,184,75,0.3);}
+.badge-closed{background:rgba(107,113,144,0.15);color:var(--muted);border:1px solid var(--border);}
+.badge-online{background:rgba(0,56,147,0.15);color:#6ca0ff;border:1px solid rgba(0,56,147,0.4);}
+.badge-paper{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.badge-hybrid{background:rgba(249,115,22,0.12);color:var(--orange);border:1px solid rgba(249,115,22,0.3);}
+.badge-received{background:rgba(232,184,75,0.12);color:var(--gold);border:1px solid rgba(232,184,75,0.2);}
+.badge-investigating{background:rgba(249,115,22,0.12);color:var(--orange);border:1px solid rgba(249,115,22,0.2);}
+.badge-resolved{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.2);}
+.btn{padding:5px 13px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;transition:all 0.15s;}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);}.btn-accent:hover{background:#a01222;}
+.btn-outline{background:transparent;color:var(--muted);border-color:var(--border);}.btn-outline:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+.btn-gold{background:rgba(232,184,75,0.12);color:var(--gold);border-color:rgba(232,184,75,0.3);}.btn-gold:hover{background:rgba(232,184,75,0.2);}
+.btn-green{background:rgba(34,197,94,0.12);color:var(--green);border-color:rgba(34,197,94,0.3);}.btn-green:hover{background:rgba(34,197,94,0.2);}
+.btn-red{background:rgba(239,68,68,0.12);color:var(--red);border-color:rgba(239,68,68,0.3);}.btn-red:hover{background:rgba(239,68,68,0.2);}
+.btn-sm{padding:3px 9px;font-size:10px;}
+.form-row{display:grid;gap:14px;margin-bottom:14px;}
+.cols-2{grid-template-columns:1fr 1fr;}.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace;}
+.form-input{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:7px 11px;color:var(--white);font-size:13px;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border-color 0.15s;}
+.form-input:focus{border-color:rgba(192,21,42,0.5);}
+select.form-input option{background:var(--card);}
+textarea.form-input{resize:vertical;min-height:70px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Fraunces',serif;font-size:18px;color:var(--white);margin-bottom:18px;}
+.search-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+.search-input{flex:1;min-width:160px;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:6px 11px;color:var(--white);font-size:12px;outline:none;}
+.search-input:focus{border-color:rgba(192,21,42,0.4);}
+.pagination{display:flex;gap:5px;justify-content:center;padding:12px 0 4px;}
+.page-btn{padding:3px 9px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.page-btn:hover:not(.active){color:var(--white);border-color:rgba(255,255,255,0.2);}
+.tab-bar{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:18px;}
+.tab{padding:7px 14px;font-size:11px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'IBM Plex Mono',monospace;}
+.tab.active{color:var(--white);border-bottom-color:var(--accent);}
+.tab:hover:not(.active){color:var(--text);}
+.alert{padding:9px 13px;border-radius:6px;font-size:12px;margin-bottom:12px;}
+.alert-error{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+.alert-success{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.hidden{display:none!important;}
+.loading{display:flex;align-items:center;justify-content:center;padding:50px;color:var(--muted);}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;width:100%;background:var(--bg);}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:38px;width:100%;max-width:360px;}
+.toast{position:fixed;bottom:28px;right:28px;z-index:1000;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--white);opacity:0;transform:translateY(16px);transition:all 0.3s;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{border-color:rgba(34,197,94,0.4);color:var(--green);}
+.toast.err{border-color:rgba(239,68,68,0.4);color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--white);margin-bottom:4px;">🏛️ Admin Panel</div>
+    <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:26px;">Sarkar Digital — Secure Access</div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Citizenship Number</label><input type="text" id="adm-cn" class="form-input" value="ADMIN-001"></div>
+    <div class="form-group" style="margin-bottom:18px;"><label class="form-label">Password</label><input type="password" id="adm-pw" class="form-input" value="admin1234"></div>
+    <div id="adm-err" class="alert alert-error hidden"></div>
+    <button id="adm-btn" class="btn btn-accent" style="width:100%;padding:10px;font-size:13px;" onclick="adminLogin()">Login</button>
+    <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:14px;">Default: ADMIN-001 / admin1234</p>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="admin-shell" class="hidden" style="display:flex;width:100%;">
+<div class="sidebar">
+  <div class="sb-brand"><div class="t">🏛️ Sarkar Digital</div><div class="s">Admin Panel</div></div>
+  <div class="sb-user"><div class="role">Administrator</div><div class="name" id="sb-name">—</div></div>
+  <div class="nav-sec">Overview</div>
+  <div class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span>Dashboard</div>
+  <div class="nav-sec">Citizens</div>
+  <div class="nav-item" onclick="nav('citizens')" id="nav-citizens"><span class="nav-icon">👥</span>All Citizens<span class="nav-badge" id="badge-pending">0</span></div>
+  <div class="nav-item" onclick="nav('roles')" id="nav-roles"><span class="nav-icon">🎭</span>Roles</div>
+  <div class="nav-item" onclick="nav('positions')" id="nav-positions"><span class="nav-icon">🏛️</span>Gov. Positions</div>
+  <div class="nav-sec">Elections</div>
+  <div class="nav-item" onclick="nav('elections')" id="nav-elections"><span class="nav-icon">🗳️</span>Elections</div>
+  <div class="nav-item" onclick="nav('candidates')" id="nav-candidates"><span class="nav-icon">👤</span>Candidate Pool</div>
+  <div class="nav-sec">Operations</div>
+  <div class="nav-item" onclick="nav('reports')" id="nav-reports"><span class="nav-icon">📣</span>Whistleblower<span class="nav-badge" id="badge-reports">0</span></div>
+  <div class="nav-item" onclick="nav('services')" id="nav-services"><span class="nav-icon">🗂️</span>Service Apps</div>
+  <div class="nav-item" onclick="nav('community')" id="nav-community"><span class="nav-icon">💬</span>Community</div>
+  <div class="sb-bot">
+    <a href="/" style="display:block;text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px;text-decoration:none;">← Citizen Portal</a>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;" id="clock"></div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard">
+      <div class="stat-grid" id="stat-grid"><div class="loading">Loading stats...</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="panel-card">
+          <div class="panel-header"><div class="panel-title">⏳ Pending Approvals</div><button class="btn btn-outline btn-sm" onclick="nav('citizens','pending')">View All</button></div>
+          <div class="panel-body" id="dash-pending"><div class="loading">Loading...</div></div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-header"><div class="panel-title">📣 New Reports</div><button class="btn btn-outline btn-sm" onclick="nav('reports')">View All</button></div>
+          <div class="panel-body" id="dash-reports"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CITIZENS -->
+    <div id="page-citizens" class="hidden">
+      <div class="tab-bar">
+        <div class="tab active" onclick="setCitizenTab('all')">All</div>
+        <div class="tab" onclick="setCitizenTab('pending')">Pending</div>
+        <div class="tab" onclick="setCitizenTab('approved')">Approved</div>
+        <div class="tab" onclick="setCitizenTab('rejected')">Rejected</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" id="c-search" placeholder="Search name, citizenship no, district…" oninput="loadCitizens()">
+        <button class="btn btn-accent btn-sm" onclick="loadCitizens()">Search</button>
+      </div>
+      <div class="panel-card">
+        <div id="citizens-wrap"><div class="loading">Loading...</div></div>
+        <div class="pagination" id="c-pag"></div>
+      </div>
+    </div>
+
+    <!-- ROLES -->
+    <div id="page-roles" class="hidden">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-accent" onclick="openRoleModal()">+ New Role</button>
+      </div>
+      <div class="panel-card"><div class="panel-header"><div class="panel-title">System Roles</div></div>
+        <div id="roles-body"><div class="loading">Loading...</div></div></div>
+    </div>
+
+    <!-- POSITIONS -->
+    <div id="page-positions" class="hidden">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-accent" onclick="openPositionModal()">+ New Position</button>
+      </div>
+      <div class="panel-card"><div class="panel-header"><div class="panel-title">Government Positions</div></div>
+        <div id="positions-body"><div class="loading">Loading...</div></div></div>
+    </div>
+
+    <!-- ELECTIONS -->
+    <div id="page-elections" class="hidden">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-accent" onclick="openElectionModal()">+ New Election</button>
+      </div>
+      <div id="elections-admin"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- CANDIDATE POOL -->
+    <div id="page-candidates" class="hidden">
+      <div class="panel-card" style="margin-bottom:18px;">
+        <div class="panel-header">
+          <div class="panel-title">📂 CSV Candidate Pool (50k records)</div>
+          <button class="btn btn-gold" id="import-btn" onclick="importPool()">Import from CSV</button>
+        </div>
+        <div class="panel-body">
+          <div id="pool-stats" style="font-size:12px;color:var(--muted);margin-bottom:14px;">Not yet imported.</div>
+          <div class="search-bar">
+            <input class="search-input" id="pool-search" placeholder="Search name…">
+            <select class="form-input" id="pool-party" style="width:auto;font-size:12px;"><option value="">All Parties</option></select>
+            <select class="form-input" id="pool-province" style="width:auto;font-size:12px;"><option value="">All Provinces</option><option>Bagmati</option><option>Koshi</option><option>Madhesh</option><option>Gandaki</option><option>Lumbini</option><option>Karnali</option><option>Sudurpashchim</option></select>
+            <input class="search-input" id="pool-district" placeholder="District…" style="flex:0.5;">
+            <button class="btn btn-outline btn-sm" onclick="poolPage=1;loadPool()">Filter</button>
+          </div>
+          <div id="pool-table"><div style="color:var(--muted);font-size:12px;padding:20px 0;">Import the pool first to browse candidates.</div></div>
+          <div class="pagination" id="pool-pag"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="page-reports" class="hidden">
+      <div class="tab-bar">
+        <div class="tab active" onclick="setReportTab('')">All</div>
+        <div class="tab" onclick="setReportTab('received')">New</div>
+        <div class="tab" onclick="setReportTab('investigating')">Investigating</div>
+        <div class="tab" onclick="setReportTab('resolved')">Resolved</div>
+      </div>
+      <div class="panel-card"><div id="reports-wrap"><div class="loading">Loading...</div></div>
+        <div class="pagination" id="r-pag"></div></div>
+    </div>
+
+    <!-- SERVICE APPS -->
+    <div id="page-services" class="hidden">
+      <div class="tab-bar">
+        <div class="tab active" onclick="setSvcTab('')">All</div>
+        <div class="tab" onclick="setSvcTab('Pending')">Pending</div>
+        <div class="tab" onclick="setSvcTab('Processing')">Processing</div>
+        <div class="tab" onclick="setSvcTab('Approved')">Approved</div>
+        <div class="tab" onclick="setSvcTab('Rejected')">Rejected</div>
+      </div>
+      <div class="panel-card"><div id="svc-wrap"><div class="loading">Loading...</div></div>
+        <div class="pagination" id="s-pag"></div></div>
+    </div>
+
+    <!-- COMMUNITY -->
+    <div id="page-community" class="hidden">
+      <div class="panel-card"><div class="panel-header"><div class="panel-title">Community Posts</div></div>
+        <div id="community-wrap"><div class="loading">Loading...</div></div>
+        <div class="pagination" id="com-pag"></div></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="citizen-modal">
+  <div class="modal-box" style="max-width:620px;">
+    <div class="modal-title" id="cm-title">Citizen Details</div>
+    <div id="cm-body"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;" id="cm-actions"></div>
+    <div style="margin-top:14px;text-align:right;"><button class="btn btn-outline" onclick="closeM('citizen-modal')">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="role-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="rm-title">Create Role</div>
+    <input type="hidden" id="rm-id">
+    <div class="form-row" style="grid-template-columns:1fr;">
+      <div class="form-group"><label class="form-label">Role Name *</label><input id="rm-name" class="form-input" placeholder="e.g. District Officer"></div>
+      <div class="form-group"><label class="form-label">Description</label><input id="rm-desc" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Permissions (JSON array)</label><textarea id="rm-perms" class="form-input" rows="2" placeholder='["approve_citizens"]'></textarea></div>
+    </div>
+    <div id="rm-err" class="alert alert-error hidden"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeM('role-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveRole()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="position-modal">
+  <div class="modal-box">
+    <div class="modal-title">Create Government Position</div>
+    <div class="form-row cols-2">
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Title *</label><input id="pm-title" class="form-input" placeholder="e.g. Ward Chair — Ward 10"></div>
+      <div class="form-group"><label class="form-label">Department</label><input id="pm-dept" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Level</label>
+        <select id="pm-level" class="form-input"><option value="ward">Ward</option><option value="municipal">Municipal</option><option value="district">District</option><option value="provincial">Provincial</option><option value="federal">Federal</option></select></div>
+      <div class="form-group"><label class="form-label">Province</label><input id="pm-province" class="form-input"></div>
+      <div class="form-group"><label class="form-label">District</label><input id="pm-district" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Municipality</label><input id="pm-muni" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Role</label><select id="pm-role" class="form-input"><option value="">— None —</option></select></div>
+    </div>
+    <div id="pm-err" class="alert alert-error hidden"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeM('position-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="savePosition()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="election-modal">
+  <div class="modal-box" style="max-width:620px;">
+    <div class="modal-title" id="em-title">Create Election</div>
+    <input type="hidden" id="em-id">
+    <div class="form-row cols-2">
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Name *</label><input id="em-name" class="form-input" placeholder="e.g. Kathmandu Mayor Election 2082"></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="em-type" class="form-input"><option value="local">Local</option><option value="provincial">Provincial</option><option value="federal">Federal</option></select></div>
+      <div class="form-group"><label class="form-label">Voting Mode</label>
+        <select id="em-mode" class="form-input"><option value="online">💻 Online Only</option><option value="paper">📄 Paper Only</option><option value="hybrid">⚖️ Hybrid</option></select></div>
+      <div class="form-group"><label class="form-label">Province</label><input id="em-province" class="form-input"></div>
+      <div class="form-group"><label class="form-label">District (used for voter eligibility)</label><input id="em-district" class="form-input" placeholder="Leave blank = national"></div>
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Constituency</label><input id="em-constituency" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input type="datetime-local" id="em-start" class="form-input"></div>
+      <div class="form-group"><label class="form-label">End Date</label><input type="datetime-local" id="em-end" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Status</label><select id="em-status" class="form-input"><option value="upcoming">Upcoming</option><option value="open">Open</option><option value="closed">Closed</option></select></div>
+      <div class="form-group"><label class="form-label">Registered Voters (paper/hybrid)</label><input type="number" id="em-voters" class="form-input" value="0"></div>
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Description</label><textarea id="em-desc" class="form-input" rows="2"></textarea></div>
+    </div>
+    <div id="em-err" class="alert alert-error hidden"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeM('election-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveElection()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="manage-modal">
+  <div class="modal-box" style="max-width:760px;">
+    <div class="modal-title" id="mm-title">Manage Election</div>
+    <div id="mm-body"></div>
+    <div style="margin-top:14px;text-align:right;"><button class="btn btn-outline" onclick="closeM('manage-modal')">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="report-modal">
+  <div class="modal-box">
+    <div class="modal-title">Report Details</div>
+    <div id="rdm-body"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="rdm-status" class="form-input" style="width:auto;">
+        <option value="received">Received</option><option value="investigating">Investigating</option><option value="resolved">Resolved</option>
+      </select>
+      <input id="rdm-notes" class="form-input" placeholder="Admin notes for reporter…" style="flex:1;">
+      <button class="btn btn-accent" onclick="saveReport()">Update</button>
+      <button class="btn btn-outline" onclick="closeM('report-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="assign-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="apm-title">Assign Position</div>
+    <input type="hidden" id="apm-cid">
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Select Position</label>
+      <select id="apm-pos" class="form-input"><option value="">— Remove position —</option></select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeM('assign-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="doAssign()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="svc-detail-modal">
+  <div class="modal-box">
+    <div class="modal-title">Update Application</div>
+    <div id="svc-detail-body"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <select id="svc-new-status" class="form-input" style="width:auto;">
+        <option value="Pending">Pending</option><option value="Processing">Processing</option>
+        <option value="Approved">Approved</option><option value="Rejected">Rejected</option>
+      </select>
+      <input id="svc-notes" class="form-input" placeholder="Notes for citizen…" style="flex:1;">
+      <button class="btn btn-accent" onclick="saveSvcApp()">Update</button>
+      <button class="btn btn-outline" onclick="closeM('svc-detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API=''; let ADM={token:null,name:null};
+let cPage=1,cTab='all',rPage=1,rTab='',sPage=1,sTab='',comPage=1,poolPage=1;
+let allRoles=[],allPositions=[],curReport=null,curSvc=null;
+
+// ── LOGIN ──
+async function adminLogin(){
+  const btn=document.getElementById('adm-btn'), err=document.getElementById('adm-err');
+  err.classList.add('hidden'); btn.textContent='…'; btn.disabled=true;
+  try{
+    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({citizenship_number:document.getElementById('adm-cn').value.trim(),password:document.getElementById('adm-pw').value})});
+    const d=await res.json();
+    if(!res.ok||d.citizen?.role!=='admin'){err.textContent=d.error||'Admin access required';err.classList.remove('hidden');return;}
+    ADM={token:d.access_token,name:d.citizen.name};
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-shell').classList.remove('hidden');
+    document.getElementById('admin-shell').style.display='flex';
+    document.getElementById('sb-name').textContent=d.citizen.name;
+    initAdmin();
+  }catch(e){err.textContent='Connection error';err.classList.remove('hidden');}
+  finally{btn.textContent='Login';btn.disabled=false;}
+}
+function adminLogout(){ADM={token:null,name:null};document.getElementById('admin-shell').classList.add('hidden');document.getElementById('login-screen').style.display='flex';}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('adm-pw').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin();});
+  setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleString();},1000);
+});
+
+// ── INIT ──
+async function initAdmin(){
+  loadStats(); loadDashPending(); loadDashReports();
+  aFetch('/api/admin/roles').then(d=>{allRoles=d;}).catch(()=>{});
+  aFetch('/api/admin/positions').then(d=>{allPositions=d;}).catch(()=>{});
+}
+
+async function loadStats(){
+  try{
+    const d=await aFetch('/api/admin/stats');
+    document.getElementById('stat-grid').innerHTML=`
+      <div class="stat-card"><div class="stat-val">${d.citizens.total}</div><div class="stat-lbl">Citizens</div><div class="stat-sub">${d.citizens.pending} pending</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--gold);">${d.citizens.pending}</div><div class="stat-lbl">Awaiting Approval</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:${d.elections.open?'var(--red)':'var(--muted)'};">${d.elections.total}</div><div class="stat-lbl">Elections</div><div class="stat-sub">${d.elections.open} open · ${d.elections.total_votes} votes</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--orange);">${d.reports.pending}</div><div class="stat-lbl">New Reports</div><div class="stat-sub">${d.reports.total} total</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--blue);">${d.services.pending}</div><div class="stat-lbl">Pending Service Apps</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--green);">${d.candidate_pool.total.toLocaleString()}</div><div class="stat-lbl">Candidate Pool</div></div>`;
+    document.getElementById('badge-pending').textContent=d.citizens.pending;
+    document.getElementById('badge-reports').textContent=d.reports.pending;
+  }catch(e){}
+}
+
+async function loadDashPending(){
+  try{
+    const d=await aFetch('/api/admin/citizens?status=pending&per_page=5');
+    const el=document.getElementById('dash-pending');
+    if(!d.citizens.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;">No pending approvals 🎉</div>';return;}
+    el.innerHTML=d.citizens.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:12px;font-weight:500;">${c.full_name_eng}</div><div style="font-size:10px;color:var(--muted);">${c.citizenship_number} · ${c.district}</div></div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-green btn-sm" onclick="quickApprove(${c.id},'${esc(c.full_name_eng)}')">✓</button>
+        <button class="btn btn-outline btn-sm" onclick="openCitizenModal(${c.id})">View</button>
+      </div></div>`).join('');
+  }catch(e){}
+}
+
+async function loadDashReports(){
+  try{
+    const d=await aFetch('/api/admin/reports?status=received');
+    const el=document.getElementById('dash-reports');
+    if(!d.reports.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;">No new reports</div>';return;}
+    el.innerHTML=d.reports.slice(0,5).map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:12px;">${r.category}</div><div style="font-size:10px;color:var(--muted);">${r.level||''} · ${new Date(r.created_at).toLocaleDateString()}</div></div>
+      <button class="btn btn-outline btn-sm" onclick="openReportModal(${r.id})">View</button>
+    </div>`).join('');
+  }catch(e){}
+}
+
+// ── NAVIGATION ──
+const PAGES=['dashboard','citizens','roles','positions','elections','candidates','reports','services','community'];
+function nav(page,param){
+  PAGES.forEach(p=>{const el=document.getElementById('page-'+p);if(el)el.classList.toggle('hidden',p!==page);const n=document.getElementById('nav-'+p);if(n)n.classList.toggle('active',p===page);});
+  const titles={dashboard:'Dashboard',citizens:'Citizen Management',roles:'Roles',positions:'Government Positions',elections:'Elections',candidates:'Candidate Pool',reports:'Whistleblower Reports',services:'Service Applications',community:'Community Posts'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  if(page==='citizens'){if(param)setCitizenTab(param);else loadCitizens();}
+  if(page==='roles')    loadRoles();
+  if(page==='positions')loadPositions();
+  if(page==='elections')loadElections();
+  if(page==='candidates')loadPool();
+  if(page==='reports')  loadReports();
+  if(page==='services') loadSvc();
+  if(page==='community')loadCommunity();
+}
+
+// ── CITIZENS ──
+function setCitizenTab(tab){cTab=tab;cPage=1;document.querySelectorAll('#page-citizens .tab').forEach((t,i)=>t.classList.toggle('active',['all','pending','approved','rejected'][i]===tab));loadCitizens();}
+
+async function loadCitizens(){
+  const search=document.getElementById('c-search')?.value||'';
+  const status=cTab==='all'?'':cTab;
+  try{
+    const d=await aFetch(`/api/admin/citizens?page=${cPage}&status=${status}&search=${enc(search)}`);
+    document.getElementById('citizens-wrap').innerHTML=`<table class="data-table">
+      <thead><tr><th>Name</th><th>CN</th><th>District</th><th>Mobile</th><th>Status</th><th>Role</th><th>Registered</th><th>Actions</th></tr></thead>
+      <tbody>${d.citizens.map(c=>`<tr>
+        <td><div style="font-weight:500;">${c.full_name_eng}</div><div style="font-size:10px;color:var(--muted);">${c.full_name_nep}</div></td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${c.citizenship_number}</td>
+        <td>${c.district}</td><td style="font-size:11px;">${c.mobile}</td>
+        <td><span class="badge badge-${c.status}">${c.status}</span></td>
+        <td><span class="badge badge-upcoming">${c.role}</span></td>
+        <td style="font-size:10px;color:var(--muted);">${new Date(c.created_at).toLocaleDateString()}</td>
+        <td><div style="display:flex;gap:4px;">
+          ${c.status==='pending'?`<button class="btn btn-green btn-sm" onclick="quickApprove(${c.id},'${esc(c.full_name_eng)}')">✓ Approve</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="openCitizenModal(${c.id})">Manage</button>
+        </div></td>
+      </tr>`).join('')}</tbody></table>`;
+    renderPag('c-pag',d.pages,cPage,p=>{cPage=p;loadCitizens();});
+  }catch(e){document.getElementById('citizens-wrap').innerHTML='<div class="alert alert-error">Failed</div>';}
+}
+
+async function quickApprove(id,name){
+  try{await aFetch(`/api/admin/citizens/${id}/approve`,'POST');toast('✓ '+name+' approved','ok');loadCitizens();loadStats();loadDashPending();}catch(e){toast('Failed','err');}
+}
+
+async function openCitizenModal(id){
+  try{
+    const c=await aFetch(`/api/admin/citizens/${id}`);
+    document.getElementById('cm-title').textContent=c.full_name_eng+' — '+c.citizenship_number;
+    document.getElementById('cm-body').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:16px;">
+        <div><div class="form-label">Nepali Name</div>${c.full_name_nep}</div>
+        <div><div class="form-label">DOB</div>${c.dob}</div>
+        <div><div class="form-label">Gender</div>${c.gender}</div>
+        <div><div class="form-label">Province</div>${c.province}</div>
+        <div><div class="form-label">District / Municipality</div>${c.district}, ${c.municipality}, Ward ${c.ward}</div>
+        <div><div class="form-label">Mobile / Email</div>${c.mobile} / ${c.email||'—'}</div>
+        <div><div class="form-label">Father / Mother</div>${c.father_name||'—'} / ${c.mother_name||'—'}</div>
+        <div><div class="form-label">Status / Role</div><span class="badge badge-${c.status}">${c.status}</span> <span class="badge badge-upcoming">${c.role}</span></div>
+        <div><div class="form-label">Position</div>${c.position?c.position.title+' ('+c.position.department+')':'— None'}</div>
+        ${c.rejection_reason?`<div style="grid-column:1/-1;"><div class="form-label">Rejection Reason</div><span style="color:var(--red);">${c.rejection_reason}</span></div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <label class="form-label" style="width:80px;flex-shrink:0;">Change Role</label>
+        <select id="cm-role" class="form-input" style="flex:1;">
+          <option value="citizen" ${c.role==='citizen'?'selected':''}>Citizen</option>
+          <option value="officer" ${c.role==='officer'?'selected':''}>Officer</option>
+          <option value="admin"   ${c.role==='admin'?'selected':''}>Admin</option>
+        </select>
+        <button class="btn btn-gold btn-sm" onclick="setRole(${c.id})">Set</button>
+      </div>`;
+    const acts=document.getElementById('cm-actions'); acts.innerHTML='';
+    if(c.status==='pending'){
+      acts.innerHTML+=`<button class="btn btn-green" onclick="approveCitizen(${c.id})">✓ Approve</button>`;
+      acts.innerHTML+=`<button class="btn btn-red" onclick="rejectCitizen(${c.id})">✗ Reject</button>`;
+    }
+    acts.innerHTML+=`<button class="btn btn-outline" onclick="openAssignModal(${c.id},'${esc(c.full_name_eng)}')">🏛️ Assign Position</button>`;
+    document.getElementById('citizen-modal').style.display='flex';
+  }catch(e){toast('Failed to load','err');}
+}
+
+async function approveCitizen(id){await aFetch(`/api/admin/citizens/${id}/approve`,'POST');closeM('citizen-modal');toast('Approved','ok');loadCitizens();loadStats();loadDashPending();}
+async function rejectCitizen(id){const r=prompt('Rejection reason (optional):');if(r===null)return;await aFetch(`/api/admin/citizens/${id}/reject`,'POST',{reason:r});closeM('citizen-modal');toast('Rejected');loadCitizens();loadStats();}
+async function setRole(id){const role=document.getElementById('cm-role').value;await aFetch(`/api/admin/citizens/${id}/role`,'POST',{role});toast('Role → '+role,'ok');loadCitizens();}
+
+// ── ROLES ──
+async function loadRoles(){
+  allRoles=await aFetch('/api/admin/roles').catch(()=>[]);
+  const el=document.getElementById('roles-body');
+  if(!allRoles.length){el.innerHTML='<div class="panel-body" style="color:var(--muted);">No roles yet.</div>';return;}
+  el.innerHTML=`<table class="data-table"><thead><tr><th>Name</th><th>Description</th><th>Permissions</th><th>Actions</th></tr></thead>
+    <tbody>${allRoles.map(r=>`<tr>
+      <td style="font-weight:500;">${r.name}</td><td style="color:var(--muted);">${r.description||'—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;">${r.permissions||'[]'}</td>
+      <td><div style="display:flex;gap:4px;">
+        <button class="btn btn-outline btn-sm" onclick='editRole(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>
+        <button class="btn btn-red btn-sm" onclick="delRole(${r.id})">Del</button>
+      </div></td></tr>`).join('')}</tbody></table>`;
+}
+
+function openRoleModal(r){
+  document.getElementById('rm-title').textContent=r?'Edit Role':'Create Role';
+  document.getElementById('rm-id').value=r?r.id:'';
+  document.getElementById('rm-name').value=r?r.name:'';
+  document.getElementById('rm-desc').value=r?r.description||'':'';
+  document.getElementById('rm-perms').value=r?r.permissions||'[]':'[]';
+  document.getElementById('rm-err').classList.add('hidden');
+  document.getElementById('role-modal').style.display='flex';
+}
+function editRole(r){openRoleModal(r);}
+async function saveRole(){
+  const id=document.getElementById('rm-id').value;
+  const body={name:document.getElementById('rm-name').value,description:document.getElementById('rm-desc').value,permissions:document.getElementById('rm-perms').value};
+  const err=document.getElementById('rm-err'); err.classList.add('hidden');
+  try{
+    if(id) await aFetch(`/api/admin/roles/${id}`,'PUT',body);
+    else   await aFetch('/api/admin/roles','POST',body);
+    closeM('role-modal');toast('Role saved','ok');loadRoles();
+    allRoles=await aFetch('/api/admin/roles').catch(()=>[]);
+  }catch(e){err.textContent=e.message;err.classList.remove('hidden');}
+}
+async function delRole(id){if(!confirm('Delete?'))return;await aFetch(`/api/admin/roles/${id}`,'DELETE');loadRoles();}
+
+// ── POSITIONS ──
+async function loadPositions(){
+  allPositions=await aFetch('/api/admin/positions').catch(()=>[]);
+  const el=document.getElementById('positions-body');
+  if(!allPositions.length){el.innerHTML='<div class="panel-body" style="color:var(--muted);">No positions yet.</div>';return;}
+  el.innerHTML=`<table class="data-table"><thead><tr><th>Title</th><th>Dept</th><th>Level</th><th>Location</th><th>Role</th><th>Holder</th><th></th></tr></thead>
+    <tbody>${allPositions.map(p=>`<tr>
+      <td style="font-weight:500;">${p.title}</td><td style="color:var(--muted);">${p.department||'—'}</td>
+      <td><span class="badge badge-upcoming">${p.level}</span></td>
+      <td style="font-size:11px;">${[p.municipality,p.district,p.province].filter(Boolean).join(', ')||'—'}</td>
+      <td style="font-size:11px;">${p.role?.name||'—'}</td>
+      <td style="font-size:11px;">${p.holder?`<span style="color:var(--green);">${p.holder}</span>`:'<span style="color:var(--muted);">Vacant</span>'}</td>
+      <td><button class="btn btn-red btn-sm" onclick="delPosition(${p.id})">Del</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+async function openPositionModal(){
+  allRoles=await aFetch('/api/admin/roles').catch(()=>[]);
+  document.getElementById('pm-role').innerHTML='<option value="">— None —</option>'+allRoles.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  document.getElementById('pm-err').classList.add('hidden');
+  document.getElementById('position-modal').style.display='flex';
+}
+async function savePosition(){
+  const body={title:document.getElementById('pm-title').value,department:document.getElementById('pm-dept').value,level:document.getElementById('pm-level').value,province:document.getElementById('pm-province').value,district:document.getElementById('pm-district').value,municipality:document.getElementById('pm-muni').value,role_id:document.getElementById('pm-role').value||null};
+  const err=document.getElementById('pm-err'); err.classList.add('hidden');
+  try{await aFetch('/api/admin/positions','POST',body);closeM('position-modal');toast('Position created','ok');loadPositions();allPositions=await aFetch('/api/admin/positions').catch(()=>[]);}
+  catch(e){err.textContent=e.message;err.classList.remove('hidden');}
+}
+async function delPosition(id){if(!confirm('Delete?'))return;await aFetch(`/api/admin/positions/${id}`,'DELETE');loadPositions();}
+
+async function openAssignModal(cid,name){
+  allPositions=await aFetch('/api/admin/positions').catch(()=>[]);
+  document.getElementById('apm-title').textContent='Assign Position — '+name;
+  document.getElementById('apm-cid').value=cid;
+  document.getElementById('apm-pos').innerHTML='<option value="">— Remove position —</option>'+allPositions.map(p=>`<option value="${p.id}">${p.title} (${p.level})${p.holder?' ['+p.holder+']':''}</option>`).join('');
+  document.getElementById('assign-modal').style.display='flex';
+}
+async function doAssign(){
+  const cid=document.getElementById('apm-cid').value,pid=document.getElementById('apm-pos').value||null;
+  await aFetch(`/api/admin/citizens/${cid}/position`,'POST',{position_id:pid});
+  closeM('assign-modal');closeM('citizen-modal');toast('Position updated','ok');loadPositions();
+}
+
+// ── ELECTIONS ──
+async function loadElections(){
+  const el=document.getElementById('elections-admin');
+  try{
+    const elections=await aFetch('/api/elections');
+    if(!elections.length){el.innerHTML='<div class="panel-card"><div class="panel-body" style="text-align:center;color:var(--muted);padding:40px;">No elections yet. Create one above.</div></div>';return;}
+    el.innerHTML=elections.map(e=>`<div class="panel-card">
+      <div class="panel-header">
+        <div><div class="panel-title">${e.name}</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">${[e.type,e.constituency,e.province,e.district].filter(Boolean).join(' · ')}</div></div>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+          <span class="badge badge-${e.status}">${e.status}</span>
+          <span class="badge badge-${e.voting_mode}">${e.voting_mode}</span>
+          <button class="btn btn-outline btn-sm" onclick="manageElection(${e.id})">Manage</button>
+          <button class="btn btn-outline btn-sm" onclick='editElection(${JSON.stringify(e).replace(/'/g,"&#39;")})'>Edit</button>
+          <button class="btn btn-red btn-sm" onclick="delElection(${e.id})">Delete</button>
+        </div>
+      </div>
+      <div class="panel-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div><div class="form-label">Candidates</div><div style="font-size:18px;font-weight:700;">${e.candidate_count}</div></div>
+        <div><div class="form-label">Voting Mode</div><div style="font-size:12px;margin-top:4px;">${e.voting_mode==='online'?'💻 Online':e.voting_mode==='paper'?'📄 Paper':'⚖️ Hybrid'}</div></div>
+        <div><div class="form-label">Online Votes</div><div style="font-size:18px;font-weight:700;color:var(--green);">${e.online_votes}</div></div>
+        <div><div class="form-label">Registered Voters</div><div style="font-size:18px;font-weight:700;">${e.total_registered_voters||0}</div></div>
+      </div></div>`).join('');
+  }catch(e){el.innerHTML='<div class="alert alert-error">Failed to load elections.</div>';}
+}
+
+function openElectionModal(){
+  document.getElementById('em-title').textContent='Create Election';
+  document.getElementById('em-id').value='';
+  ['em-name','em-province','em-district','em-constituency','em-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('em-voters').value='0';
+  document.getElementById('em-err').classList.add('hidden');
+  document.getElementById('election-modal').style.display='flex';
+}
+function editElection(e){
+  document.getElementById('em-title').textContent='Edit Election';
+  document.getElementById('em-id').value=e.id;
+  document.getElementById('em-name').value=e.name;
+  document.getElementById('em-type').value=e.election_type||'local';
+  document.getElementById('em-mode').value=e.voting_mode||'online';
+  document.getElementById('em-province').value=e.province||'';
+  document.getElementById('em-district').value=e.district||'';
+  document.getElementById('em-constituency').value=e.constituency||'';
+  document.getElementById('em-status').value=e.status||'upcoming';
+  document.getElementById('em-voters').value=e.total_registered_voters||0;
+  document.getElementById('em-desc').value=e.description||'';
+  document.getElementById('em-err').classList.add('hidden');
+  document.getElementById('election-modal').style.display='flex';
+}
+async function saveElection(){
+  const id=document.getElementById('em-id').value;
+  const body={name:document.getElementById('em-name').value,election_type:document.getElementById('em-type').value,voting_mode:document.getElementById('em-mode').value,province:document.getElementById('em-province').value,district:document.getElementById('em-district').value,constituency:document.getElementById('em-constituency').value,status:document.getElementById('em-status').value,total_registered_voters:document.getElementById('em-voters').value,description:document.getElementById('em-desc').value,start_date:document.getElementById('em-start').value||undefined,end_date:document.getElementById('em-end').value||undefined};
+  const err=document.getElementById('em-err'); err.classList.add('hidden');
+  try{
+    if(id) await aFetch(`/api/admin/elections/${id}`,'PUT',body);
+    else   await aFetch('/api/admin/elections','POST',body);
+    closeM('election-modal');toast('Election saved','ok');loadElections();loadStats();
+  }catch(e){err.textContent=e.message;err.classList.remove('hidden');}
+}
+async function delElection(id){if(!confirm('Delete election and all data?'))return;await aFetch(`/api/admin/elections/${id}`,'DELETE');loadElections();loadStats();}
+
+async function manageElection(eid){
+  try{
+    const e=await aFetch(`/api/elections/${eid}`);
+    document.getElementById('mm-title').textContent='Manage: '+e.name;
+    let paperForm='';
+    if(e.voting_mode==='paper'||e.voting_mode==='hybrid'){
+      paperForm=`<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+        <div class="form-label" style="margin-bottom:10px;">📄 Enter Paper Ballot Results</div>
+        ${e.candidates.map(c=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+          <span style="flex:1;font-size:12px;">${c.name} (${c.party})</span>
+          <input type="number" id="paper-${c.id}" class="form-input" placeholder="0" min="0" style="width:110px;" value="${c.paper_votes||0}">
+        </div>`).join('')}
+        <button class="btn btn-accent btn-sm" style="margin-top:10px;" onclick="savePaper(${eid},[${e.candidates.map(c=>c.id).join(',')}])">Save Paper Results</button>
+      </div>`;
+    }
+    document.getElementById('mm-body').innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="form-label">Candidates (${e.candidates.length})</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="toggleAddForm()">+ Add</button>
+          <button class="btn btn-gold btn-sm" onclick="toggleImportForm()">📂 Import from Pool</button>
+        </div>
+      </div>
+      <div id="add-form" style="display:none;background:var(--card2);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div class="form-row cols-2">
+          <div class="form-group"><label class="form-label">Name *</label><input id="cn-name" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Party</label><input id="cn-party" class="form-input" placeholder="or Independent"></div>
+          <div class="form-group"><label class="form-label">Age</label><input id="cn-age" class="form-input" type="number"></div>
+          <div class="form-group"><label class="form-label">Gender</label><select id="cn-gender" class="form-input"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div class="form-group"><label class="form-label">District</label><input id="cn-district" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Symbol</label><input id="cn-symbol" class="form-input"></div>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="addCandidate(${eid})">Add</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleAddForm()">Cancel</button>
+      </div>
+      <div id="import-form" style="display:none;background:var(--card2);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div class="form-row cols-3">
+          <div class="form-group"><label class="form-label">Party</label><input id="imp-party" class="form-input" placeholder="Any"></div>
+          <div class="form-group"><label class="form-label">Province</label><input id="imp-province" class="form-input" placeholder="Any"></div>
+          <div class="form-group"><label class="form-label">District</label><input id="imp-district" class="form-input" placeholder="Any"></div>
+          <div class="form-group"><label class="form-label">Import Limit</label><input id="imp-limit" class="form-input" type="number" value="10" min="1" max="100"></div>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="importCandidates(${eid})">Import</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleImportForm()">Cancel</button>
+      </div>
+      <table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Party</th><th>Age</th><th>Gender</th><th>District</th><th></th></tr></thead>
+        <tbody>${e.candidates.map((c,i)=>`<tr>
+          <td style="color:var(--muted);">${i+1}</td>
+          <td style="font-weight:500;">${c.name}</td>
+          <td>${c.party||'Ind'}</td><td>${c.age||'—'}</td><td>${c.gender||'—'}</td><td>${c.district||'—'}</td>
+          <td><button class="btn btn-red btn-sm" onclick="removeCand(${eid},${c.id})">✕</button></td>
+        </tr>`).join('')}</tbody></table>
+      ${paperForm}`;
+    document.getElementById('manage-modal').style.display='flex';
+  }catch(e){toast('Failed','err');}
+}
+
+function toggleAddForm(){const f=document.getElementById('add-form');f.style.display=f.style.display==='none'?'block':'none';}
+function toggleImportForm(){const f=document.getElementById('import-form');f.style.display=f.style.display==='none'?'block':'none';}
+
+async function addCandidate(eid){
+  const body={name:document.getElementById('cn-name').value,party:document.getElementById('cn-party').value,age:document.getElementById('cn-age').value||null,gender:document.getElementById('cn-gender').value,district:document.getElementById('cn-district').value,symbol:document.getElementById('cn-symbol').value};
+  try{await aFetch(`/api/admin/elections/${eid}/candidates`,'POST',body);toast('Candidate added','ok');manageElection(eid);}catch(e){toast(e.message,'err');}
+}
+async function importCandidates(eid){
+  const body={party:document.getElementById('imp-party').value,province:document.getElementById('imp-province').value,district:document.getElementById('imp-district').value,limit:parseInt(document.getElementById('imp-limit').value)||10};
+  try{const d=await aFetch(`/api/admin/elections/${eid}/candidates/import-csv`,'POST',body);toast(d.message,'ok');manageElection(eid);}catch(e){toast(e.message||'Import failed — import pool first','err');}
+}
+async function removeCand(eid,cid){if(!confirm('Remove?'))return;await aFetch(`/api/admin/elections/${eid}/candidates/${cid}`,'DELETE');manageElection(eid);}
+async function savePaper(eid,cids){
+  const results=cids.map(cid=>({candidate_id:cid,votes_count:parseInt(document.getElementById('paper-'+cid).value)||0}));
+  try{await aFetch(`/api/admin/elections/${eid}/paper-results`,'POST',{results});toast('Paper results saved','ok');}catch(e){toast('Failed','err');}
+}
+
+// ── CANDIDATE POOL ──
+async function importPool(){
+  const btn=document.getElementById('import-btn');btn.textContent='Importing…';btn.disabled=true;
+  try{const d=await aFetch('/api/admin/candidate-pool/import','POST');toast(d.message,'ok');loadStats();loadPool();loadPoolParties();}
+  catch(e){toast(e.message||'Failed','err');}
+  finally{btn.textContent='Import from CSV';btn.disabled=false;}
+}
+async function loadPoolParties(){
+  try{const d=await aFetch('/api/admin/candidate-pool/parties');const sel=document.getElementById('pool-party');sel.innerHTML='<option value="">All Parties</option>'+d.map(p=>`<option value="${esc(p.party)}">${esc(p.party)} (${p.count})</option>`).join('');}catch(e){}
+}
+async function loadPool(){
+  const search=document.getElementById('pool-search')?.value||'';
+  const party=document.getElementById('pool-party')?.value||'';
+  const province=document.getElementById('pool-province')?.value||'';
+  const district=document.getElementById('pool-district')?.value||'';
+  try{
+    const d=await aFetch(`/api/admin/candidate-pool?page=${poolPage}&search=${enc(search)}&party=${enc(party)}&province=${enc(province)}&district=${enc(district)}`);
+    document.getElementById('pool-stats').textContent=d.total.toLocaleString()+' candidates in pool';
+    if(!d.candidates.length){document.getElementById('pool-table').innerHTML='<div style="color:var(--muted);font-size:12px;padding:16px 0;">No results. Import pool or change filters.</div>';return;}
+    document.getElementById('pool-table').innerHTML=`<table class="data-table" style="font-size:11px;">
+      <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Party</th><th>Province</th><th>District</th><th>Ward</th></tr></thead>
+      <tbody>${d.candidates.map(c=>`<tr><td style="font-family:'IBM Plex Mono',monospace;">${c.candidate_id}</td><td style="font-weight:500;">${c.name}</td><td>${c.age||'—'}</td><td>${c.gender||'—'}</td><td>${c.party||'—'}</td><td>${c.province||'—'}</td><td>${c.district||'—'}</td><td>${c.ward||'—'}</td></tr>`).join('')}</tbody></table>`;
+    renderPag('pool-pag',d.pages,poolPage,p=>{poolPage=p;loadPool();});
+  }catch(e){document.getElementById('pool-table').innerHTML='<div style="color:var(--muted);">Import pool first.</div>';}
+}
+
+// ── REPORTS ──
+function setReportTab(tab){rTab=tab;rPage=1;document.querySelectorAll('#page-reports .tab').forEach((t,i)=>t.classList.toggle('active',['','received','investigating','resolved'][i]===tab));loadReports();}
+async function loadReports(){
+  try{
+    const d=await aFetch(`/api/admin/reports?page=${rPage}&status=${rTab}`);
+    document.getElementById('reports-wrap').innerHTML=`<table class="data-table"><thead><tr><th>ID</th><th>Category</th><th>Level</th><th>Status</th><th>Date</th><th>File</th><th></th></tr></thead>
+      <tbody>${d.reports.map(r=>`<tr>
+        <td style="font-family:'IBM Plex Mono',monospace;">#${r.id}</td>
+        <td style="font-weight:500;">${r.category}</td><td>${r.level||'—'}</td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td style="font-size:10px;color:var(--muted);">${new Date(r.created_at).toLocaleDateString()}</td>
+        <td>${r.has_file?'📎':''}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="openReportModal(${r.id})">View</button></td>
+      </tr>`).join('')}</tbody></table>`;
+    renderPag('r-pag',d.pages,rPage,p=>{rPage=p;loadReports();});
+  }catch(e){}
+}
+async function openReportModal(id){
+  curReport=id;
+  try{
+    const r=await aFetch(`/api/admin/reports/${id}`);
+    document.getElementById('rdm-body').innerHTML=`<div style="font-size:12px;line-height:1.8;"><div><b>Category:</b> ${r.category}</div><div><b>Level:</b> ${r.level||'—'}</div><div><b>Submitted:</b> ${new Date(r.created_at).toLocaleString()}</div><div style="margin-top:8px;padding:10px;background:var(--card2);border-radius:6px;">${r.description}</div>${r.admin_notes?`<div style="margin-top:8px;color:var(--muted);"><b>Current notes:</b> ${r.admin_notes}</div>`:''}</div>`;
+    document.getElementById('rdm-status').value=r.status;
+    document.getElementById('rdm-notes').value=r.admin_notes||'';
+    document.getElementById('report-modal').style.display='flex';
+  }catch(e){toast('Failed','err');}
+}
+async function saveReport(){
+  try{await aFetch(`/api/admin/reports/${curReport}`,'PUT',{status:document.getElementById('rdm-status').value,admin_notes:document.getElementById('rdm-notes').value});closeM('report-modal');toast('Report updated','ok');loadReports();loadStats();}catch(e){toast('Failed','err');}
+}
+
+// ── SERVICE APPS ──
+function setSvcTab(tab){sTab=tab;sPage=1;document.querySelectorAll('#page-services .tab').forEach((t,i)=>t.classList.toggle('active',['','Pending','Processing','Approved','Rejected'][i]===tab));loadSvc();}
+async function loadSvc(){
+  try{
+    const d=await aFetch(`/api/admin/service-applications?page=${sPage}&status=${sTab}`);
+    document.getElementById('svc-wrap').innerHTML=`<table class="data-table"><thead><tr><th>ID</th><th>Citizen</th><th>Service</th><th>Department</th><th>Status</th><th>Date</th><th></th></tr></thead>
+      <tbody>${d.applications.map(a=>`<tr>
+        <td>#${a.id}</td><td><div>${a.citizen}</div><div style="font-size:10px;color:var(--muted);">${a.citizenship_number}</div></td>
+        <td style="font-weight:500;">${a.service}</td><td style="color:var(--muted);font-size:11px;">${a.department}</td>
+        <td><span class="badge badge-${a.status==='Pending'?'pending':a.status==='Approved'?'approved':a.status==='Rejected'?'rejected':'upcoming'}">${a.status}</span></td>
+        <td style="font-size:10px;color:var(--muted);">${new Date(a.created_at).toLocaleDateString()}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="openSvc(${a.id},'${esc(a.service)}','${a.citizen}','${a.status}','${esc(a.notes)}')">Update</button></td>
+      </tr>`).join('')}</tbody></table>`;
+    renderPag('s-pag',d.pages,sPage,p=>{sPage=p;loadSvc();});
+  }catch(e){}
+}
+function openSvc(id,service,citizen,status,notes){
+  curSvc=id;
+  document.getElementById('svc-detail-body').innerHTML=`<div style="font-size:12px;margin-bottom:12px;"><div><b>Service:</b> ${service}</div><div><b>Citizen:</b> ${citizen}</div><div><b>Current status:</b> ${status}</div></div>`;
+  document.getElementById('svc-new-status').value=status;
+  document.getElementById('svc-notes').value=notes;
+  document.getElementById('svc-detail-modal').style.display='flex';
+}
+async function saveSvcApp(){
+  try{await aFetch(`/api/admin/service-applications/${curSvc}`,'PUT',{status:document.getElementById('svc-new-status').value,notes:document.getElementById('svc-notes').value});closeM('svc-detail-modal');toast('Updated','ok');loadSvc();}catch(e){toast('Failed','err');}
+}
+
+// ── COMMUNITY ──
+async function loadCommunity(){
+  try{
+    const d=await aFetch(`/api/admin/community?page=${comPage}`);
+    document.getElementById('community-wrap').innerHTML=`<table class="data-table"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Author</th><th>Likes</th><th>Pinned</th><th>Hidden</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>${d.posts.map(p=>`<tr>
+        <td>#${p.id}</td><td style="font-weight:500;max-width:200px;">${p.title}</td>
+        <td><span class="badge badge-upcoming">${p.category}</span></td>
+        <td style="font-size:11px;">${p.author}</td>
+        <td>${p.likes}</td>
+        <td>${p.is_pinned?'📌':''}</td>
+        <td>${p.is_hidden?'🙈':''}</td>
+        <td style="font-size:10px;color:var(--muted);">${new Date(p.created_at).toLocaleDateString()}</td>
+        <td><div style="display:flex;gap:4px;">
+          <button class="btn btn-outline btn-sm" onclick="pinPost(${p.id})">${p.is_pinned?'Unpin':'Pin'}</button>
+          <button class="btn btn-outline btn-sm" onclick="hidePost(${p.id})">${p.is_hidden?'Show':'Hide'}</button>
+          <button class="btn btn-red btn-sm" onclick="delPost(${p.id})">Del</button>
+        </div></td>
+      </tr>`).join('')}</tbody></table>`;
+    renderPag('com-pag',d.pages,comPage,p=>{comPage=p;loadCommunity();});
+  }catch(e){}
+}
+async function pinPost(id){await aFetch(`/api/admin/community/${id}/pin`,'POST');toast('Updated','ok');loadCommunity();}
+async function hidePost(id){await aFetch(`/api/admin/community/${id}/hide`,'POST');toast('Updated','ok');loadCommunity();}
+async function delPost(id){if(!confirm('Delete post?'))return;await aFetch(`/api/admin/community/${id}`,'DELETE');toast('Deleted');loadCommunity();}
+
+// ── HELPERS ──
+async function aFetch(url,method='GET',body=null){
+  const opts={method,headers:{'Content-Type':'application/json','Authorization':'Bearer '+ADM.token}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  const d=await res.json();
+  if(!res.ok) throw new Error(d.error||'Failed');
+  return d;
+}
+
+function renderPag(elId,pages,current,onClick){
+  const el=document.getElementById(elId); if(!el)return;
+  el.innerHTML='';
+  const start=Math.max(1,current-2),end=Math.min(pages,current+2);
+  for(let i=start;i<=end;i++){
+    const btn=document.createElement('button');
+    btn.textContent=i;btn.className='page-btn'+(i===current?' active':'');
+    btn.onclick=()=>onClick(i); el.appendChild(btn);
+  }
+}
+function closeM(id){document.getElementById(id).style.display='none';}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function enc(s){return encodeURIComponent(s);}
+</script>
+</body>
+</html>

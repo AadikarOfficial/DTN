@@ -1,122 +1,69 @@
-# 🇳🇵 Nepal Digital Government Platform (DTN)
+# Sarkar Digital — Nepal e-Government Platform
 
-A secure-by-design government digital platform for Nepal covering citizen registration, digital voting, public services, and anonymous whistleblowing.
+A secure-by-design digital government platform. Built for the BCS Hackathon.
 
-## 🚀 Quick Start
-
-### Requirements
-- Python 3.10+
-- pip
-
-### Setup & Run
+## Setup
 
 ```bash
-# 1. Create and activate a virtual environment
+cd DTN
 python3 -m venv venv
-source venv/bin/activate        # Linux/Mac
-venv\Scripts\activate           # Windows
-
-# 2. Install dependencies
-pip install flask flask-sqlalchemy flask-jwt-extended flask-cors bcrypt python-dotenv
-
-# 3. Copy and configure environment
-cp .env.example .env
-# Edit .env and set strong SECRET_KEY and JWT_SECRET_KEY
-
-# 4. Run the backend
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env          # Edit SECRET_KEY and JWT_SECRET_KEY
 python app.py
 ```
 
-The API starts at: **http://localhost:5000**
+Open http://localhost:5000 (citizen portal) and http://localhost:5000/admin (admin panel).
 
-### Test the API
+## Default Admin Credentials
+- Citizenship Number: `ADMIN-001`
+- Password: `admin1234`
 
-```bash
-# Health check
-curl http://localhost:5000/api/health
+## Architecture
 
-# Register a citizen
-curl -X POST http://localhost:5000/api/register \
-  -H "Content-Type: application/json" \
-  -d '{"full_name_eng":"Ram Thapa","full_name_nep":"राम थापा","dob":"1990-01-15","gender":"male","province":"Bagmati","district":"Kathmandu","municipality":"KMC","ward":10,"citizenship_number":"12-34-56789","issued_district":"Kathmandu","mobile":"9841234567","password":"SecurePass123"}'
+- **Backend**: Flask + SQLAlchemy + JWT + bcrypt
+- **Database**: SQLite (dev) — swap for PostgreSQL in production
+- **Auth**: JWT access tokens (30 min) + refresh tokens (24 hr)
+- **Roles**: citizen / officer / admin
 
-# Login
-curl -X POST http://localhost:5000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"citizenship_number":"12-34-56789","password":"SecurePass123"}'
+## Key Security Features
 
-# List services (no auth needed)
-curl http://localhost:5000/api/services
+1. **bcrypt password hashing** (12 rounds)
+2. **JWT authentication** on all protected endpoints
+3. **Role-based access control** (citizen/officer/admin)
+4. **Admin approval flow** — citizens cannot vote/apply until approved
+5. **District-based voting eligibility** — voters can only vote in their registered district's elections
+6. **Double-vote prevention** — DB-level unique constraint per (citizen, election)
+7. **Anonymous whistleblower** — 64-char hex tokens, no identity stored, IP not logged
+8. **File upload security** — extension whitelist + filename hashing (SHA-256)
+9. **SQL injection protection** — ORM parameterised queries throughout
+10. **Input validation** — server-side validation on all endpoints
 
-# Submit anonymous report
-curl -X POST http://localhost:5000/api/report \
-  -F "category=Corruption" \
-  -F "level=municipal" \
-  -F "description=Official demanded bribe for passport renewal at ward office"
-```
+## Features
 
-## 📁 Project Structure
+### Citizen Portal (`/`)
+- Register with citizenship details (pending admin approval)
+- Login with citizenship number + password
+- Browse and apply for 8 government services
+- Vote in open elections (district eligibility enforced)
+- Community board — post ideas, feedback, complaints
+- Anonymous whistleblower report submission + tracking
+- Personal dashboard with application status and voting history
 
-```
-nepal_digital_gov/
-├── app.py              # Flask app factory, blueprints, seeding
-├── config.py           # Config with .env support
-├── database.py         # SQLAlchemy instance
-├── models.py           # All DB models (Citizen, Election, Vote, Report, Service)
-├── requirements.txt
-├── .env                # Your secrets (DO NOT COMMIT)
-├── .env.example        # Template
-├── routes/
-│   ├── auth.py         # Login, refresh token, /me endpoint
-│   ├── citizen.py      # Register, view/list citizens
-│   ├── voting.py       # Elections, candidates, cast vote, results
-│   ├── whistleblower.py# Anonymous report submission + tracking
-│   └── services.py     # Government services + applications
-├── uploads/            # Uploaded files (gitignored)
-└── templates/
-    └── index.html      # Full frontend UI
-```
+### Admin Panel (`/admin`)
+- Real-time stats dashboard
+- Citizen approval queue — approve/reject registrations
+- Role management — create custom roles with permissions
+- Government position management — assign positions to citizens
+- Election management — create elections with Online/Paper/Hybrid modes
+- Candidate pool — import 50,000 candidates from CSV, filter and add to elections
+- District-based voter eligibility on elections
+- Hybrid elections — enter paper results, compare with online votes for discrepancy detection
+- Whistleblower report management — update status, add admin notes
+- Service application management — approve/reject citizen applications
+- Community moderation — pin, hide, delete posts
 
-## 🔐 Security Features
-
-| Feature | Implementation |
-|---------|----------------|
-| Password hashing | bcrypt (12 rounds) |
-| Authentication | JWT (30min access + 24h refresh tokens) |
-| Double vote prevention | DB UniqueConstraint on (citizen_id, election_id) |
-| Anonymous reporting | Random 64-char case tokens, no identity stored |
-| File upload security | Extension whitelist, filename hashing, path traversal prevention |
-| Input validation | Required field checks, format validation |
-| Role-based access | citizen / officer / admin roles on all protected endpoints |
-
-## 🌐 API Endpoints
-
-### Auth
-- `POST /api/register` — Register new citizen
-- `POST /api/login` — Login, returns JWT tokens
-- `POST /api/refresh` — Refresh access token
-- `GET /api/me` — Get current user profile (auth required)
-
-### Citizens (auth required)
-- `GET /api/citizens/<id>` — View citizen profile
-- `GET /api/citizens` — List all (admin only)
-
-### Voting (auth required)
-- `GET /api/elections` — List elections
-- `GET /api/elections/<id>` — Election + candidates
-- `POST /api/vote` — Cast vote (one per citizen per election)
-- `GET /api/elections/<id>/results` — Results (only after closed)
-- `POST /api/elections` — Create election (admin only)
-
-### Services
-- `GET /api/services` — List all services
-- `POST /api/services/apply` — Apply (auth required)
-- `GET /api/services/my-applications` — My applications (auth required)
-- `PUT /api/services/applications/<id>` — Update status (officer/admin)
-
-### Whistleblower (anonymous)
-- `POST /api/report` — Submit anonymous report
-- `GET /api/report/track?token=<token>` — Track report by token
-
-### Health
-- `GET /api/health` — Service health check
+## Voting Modes
+- **Online**: Citizens vote via the portal; eligibility by registered district
+- **Paper**: Voting done at polling stations; admin enters results
+- **Hybrid**: Both online + paper; results compared for discrepancy detection (paper takes precedence)
