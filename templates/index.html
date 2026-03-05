@@ -753,7 +753,36 @@
     <div class="status-dot"></div>
     Systems Nominal
   </div>
+  <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+    <button class="btn-primary" style="font-size:11px;padding:6px 16px;" onclick="openLoginModal()">Login</button>
+  </div>
+  <div id="nav-user" style="display:none;align-items:center;gap:10px;">
+    <span id="nav-username" style="font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;"></span>
+    <button class="btn-secondary" style="font-size:11px;padding:6px 14px;" onclick="logout()">Logout</button>
+  </div>
 </nav>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:36px;width:100%;max-width:400px;margin:20px;">
+    <h3 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:6px;">🔐 Citizen Login</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:24px;">Enter your credentials to access the portal.</p>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Citizenship Number</label>
+      <input type="text" id="login-citizenship" class="form-input" placeholder="00-00-00-00000">
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Password</label>
+      <input type="password" id="login-password" class="form-input" placeholder="Your password">
+    </div>
+    <div id="login-error" style="display:none;color:var(--crimson);font-size:12px;margin-bottom:12px;padding:8px;background:rgba(192,21,42,0.1);border-radius:4px;"></div>
+    <div style="display:flex;gap:12px;">
+      <button id="login-btn" class="btn-primary" style="flex:1;" onclick="doLogin()">Login</button>
+      <button class="btn-secondary" onclick="closeLoginModal()">Cancel</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:16px;text-align:center;">No account? <span style="color:var(--gold);cursor:pointer;" onclick="closeLoginModal();showSection('registration')">Register here →</span></p>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast">✓ <span id="toast-msg">Action completed securely</span></div>
@@ -905,47 +934,47 @@
   <div class="form-grid">
     <div class="form-group">
       <label class="form-label">Full Name (Nepali)</label>
-      <input type="text" class="form-input" placeholder="पूरा नाम">
+      <input type="text" id="reg-name-nep" class="form-input" placeholder="पूरा नाम">
     </div>
     <div class="form-group">
       <label class="form-label">Full Name (English)</label>
-      <input type="text" class="form-input" placeholder="Full name in Roman">
+      <input type="text" id="reg-name-eng" class="form-input" placeholder="Full name in Roman">
     </div>
     <div class="form-group">
       <label class="form-label">Date of Birth</label>
-      <input type="date" class="form-input">
+      <input type="date" id="reg-dob" class="form-input">
     </div>
     <div class="form-group">
       <label class="form-label">Gender</label>
-      <select class="form-input">
-        <option>Male / पुरुष</option>
-        <option>Female / महिला</option>
-        <option>Other / अन्य</option>
+      <select id="reg-gender" class="form-input">
+        <option value="Male">Male / पुरुष</option>
+        <option value="Female">Female / महिला</option>
+        <option value="Other">Other / अन्य</option>
       </select>
     </div>
     <div class="form-group">
       <label class="form-label">Province</label>
-      <select class="form-input">
-        <option>Koshi (Province 1)</option>
-        <option>Madhesh (Province 2)</option>
-        <option>Bagmati (Province 3)</option>
-        <option>Gandaki (Province 4)</option>
-        <option>Lumbini (Province 5)</option>
-        <option>Karnali (Province 6)</option>
-        <option>Sudurpashchim (Province 7)</option>
+      <select id="reg-province" class="form-input">
+        <option value="Koshi">Koshi (Province 1)</option>
+        <option value="Madhesh">Madhesh (Province 2)</option>
+        <option value="Bagmati">Bagmati (Province 3)</option>
+        <option value="Gandaki">Gandaki (Province 4)</option>
+        <option value="Lumbini">Lumbini (Province 5)</option>
+        <option value="Karnali">Karnali (Province 6)</option>
+        <option value="Sudurpashchim">Sudurpashchim (Province 7)</option>
       </select>
     </div>
     <div class="form-group">
       <label class="form-label">District</label>
-      <input type="text" class="form-input" placeholder="Select district">
+      <input type="text" id="reg-district" class="form-input" placeholder="Select district">
     </div>
     <div class="form-group">
       <label class="form-label">Municipality / VDC</label>
-      <input type="text" class="form-input" placeholder="Municipality name">
+      <input type="text" id="reg-municipality" class="form-input" placeholder="Municipality name">
     </div>
     <div class="form-group">
       <label class="form-label">Ward Number</label>
-      <input type="number" class="form-input" placeholder="Ward no.">
+      <input type="number" id="reg-ward" class="form-input" placeholder="Ward no.">
     </div>
   </div>
 
@@ -953,19 +982,19 @@
   <div class="form-grid">
     <div class="form-group">
       <label class="form-label">Citizenship Number</label>
-      <input type="text" class="form-input" placeholder="00-00-00-00000">
+      <input type="text" id="reg-citizenship" class="form-input" placeholder="00-00-00-00000">
     </div>
     <div class="form-group">
       <label class="form-label">Citizenship Issued District</label>
-      <input type="text" class="form-input" placeholder="Issuing district">
+      <input type="text" id="reg-issued-district" class="form-input" placeholder="Issuing district">
     </div>
     <div class="form-group">
       <label class="form-label">Father's Name</label>
-      <input type="text" class="form-input" placeholder="Father's name">
+      <input type="text" id="reg-father" class="form-input" placeholder="Father's name">
     </div>
     <div class="form-group">
       <label class="form-label">Mother's Name</label>
-      <input type="text" class="form-input" placeholder="Mother's name">
+      <input type="text" id="reg-mother" class="form-input" placeholder="Mother's name">
     </div>
   </div>
 
@@ -995,7 +1024,11 @@
   <div class="form-grid">
     <div class="form-group">
       <label class="form-label">Mobile Number</label>
-      <input type="tel" class="form-input" placeholder="+977 98XXXXXXXX">
+      <input type="tel" id="reg-mobile" class="form-input" placeholder="+977 98XXXXXXXX">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="reg-password" class="form-input" placeholder="Min 8 characters">
     </div>
     <div class="form-group">
       <label class="form-label">Authentication Method</label>
@@ -1007,8 +1040,11 @@
     </div>
   </div>
 
+  <div id="reg-error" style="display:none;color:var(--crimson);margin-top:12px;font-size:13px;padding:10px;background:rgba(192,21,42,0.1);border-radius:6px;border:1px solid rgba(192,21,42,0.3);"></div>
+  <div id="reg-success" style="display:none;color:var(--green);margin-top:12px;font-size:13px;padding:10px;background:rgba(34,197,94,0.1);border-radius:6px;border:1px solid rgba(34,197,94,0.3);"></div>
+
   <div style="margin-top:32px;display:flex;gap:16px;flex-wrap:wrap;">
-    <button class="btn-primary" onclick="showToast('Registration submitted! NID will be issued within 7 days after field verification.')">Submit Registration</button>
+    <button id="reg-submit-btn" class="btn-primary" onclick="submitRegistration()">Submit Registration</button>
     <button class="btn-secondary">Save Draft</button>
   </div>
 
@@ -1075,7 +1111,7 @@
             <div class="control-name">Birth Certificate</div>
             <div class="control-detail">Apply, verify, or download your birth certificate digitally.</div>
           </div>
-          <button class="btn-secondary" style="padding:6px 16px;font-size:11px;margin-left:auto;flex-shrink:0;" onclick="showToast('Opening Birth Certificate module...')">Open</button>
+          <button class="btn-secondary" style="padding:6px 16px;font-size:11px;margin-left:auto;flex-shrink:0;" onclick="applyService(1)">Apply</button>
         </li>
         <li class="control-item">
           <div class="control-icon">🏠</div>
@@ -1180,76 +1216,36 @@
     <span>Voting uses <strong>blind signature protocol</strong> — the server issues a token without knowing who you are. Your ballot is encrypted with the election public key. Only after polls close is the tally computed using homomorphic addition. No one can link your identity to your vote.</span>
   </div>
 
-  <div class="grid-3" style="margin-bottom:32px;">
-    <div class="card">
-      <div class="card-icon">🏛️</div>
-      <div class="card-title">Federal Parliament</div>
-      <div class="card-desc">House of Representatives — 165 FPTP seats. Vote for your constituency MP.</div>
-      <div class="card-tags"><span class="tag tag-red">ACTIVE</span><span class="tag tag-blue">National</span></div>
-      <button class="btn-primary" style="margin-top:16px;width:100%;" onclick="showVotingBooth()">Vote Now</button>
-    </div>
-    <div class="card">
-      <div class="card-icon">🏘️</div>
-      <div class="card-title">Provincial Assembly</div>
-      <div class="card-desc">Province No. 3 (Bagmati) Assembly — Vote for your provincial representative.</div>
-      <div class="card-tags"><span class="tag tag-gold">Opens in 12 days</span></div>
-    </div>
-    <div class="card">
-      <div class="card-icon">🌳</div>
-      <div class="card-title">Municipal / Ward</div>
-      <div class="card-desc">Kathmandu Metropolitan City Ward 10 — Mayor, Deputy Mayor, Ward Chair.</div>
-      <div class="card-tags"><span class="tag tag-gold">Opens in 30 days</span></div>
+  <div id="elections-list" class="grid-3" style="margin-bottom:32px;">
+    <div class="card" style="grid-column:1/-1;text-align:center;padding:40px;">
+      <div style="font-size:32px;margin-bottom:12px;">⏳</div>
+      <div class="card-desc">Loading live elections...</div>
     </div>
   </div>
 
   <div id="voting-booth" style="display:none;">
     <div class="card" style="margin-bottom:24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:gap;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
         <div>
-          <div class="card-title">Constituency: Kathmandu-3</div>
-          <div class="card-desc">Federal Parliament — House of Representatives Election 2081 B.S.</div>
+          <div class="card-title" id="booth-election-name">Election</div>
+          <div class="card-desc" id="booth-election-meta"></div>
         </div>
         <div class="tag tag-red">VOTING OPEN</div>
       </div>
 
       <div class="security-notice" style="margin-bottom:20px;">
         <span>🔒</span>
-        <span>Select your candidate. Your selection will be encrypted locally before submission. You can verify your ballot receipt after voting without revealing your vote.</span>
+        <span>Select your candidate. Your selection will be encrypted before submission. Login required to cast a vote.</span>
       </div>
 
-      <div class="candidate-grid" id="candidate-grid">
-        <div class="candidate-card" onclick="selectCandidate(this, 'Ramesh Sharma Paudel')">
-          <div class="candidate-avatar">👨</div>
-          <div class="candidate-name">Ramesh Sharma Paudel</div>
-          <div class="candidate-party">Nepali Congress</div>
-        </div>
-        <div class="candidate-card" onclick="selectCandidate(this, 'Sita Devi Thapa')">
-          <div class="candidate-avatar">👩</div>
-          <div class="candidate-name">Sita Devi Thapa</div>
-          <div class="candidate-party">CPN-UML</div>
-        </div>
-        <div class="candidate-card" onclick="selectCandidate(this, 'Bikash Gurung')">
-          <div class="candidate-avatar">👨</div>
-          <div class="candidate-name">Bikash Gurung</div>
-          <div class="candidate-party">CPN (Maoist Centre)</div>
-        </div>
-        <div class="candidate-card" onclick="selectCandidate(this, 'Anita Rai')">
-          <div class="candidate-avatar">👩</div>
-          <div class="candidate-name">Anita Rai</div>
-          <div class="candidate-party">Rastriya Prajatantra Party</div>
-        </div>
-        <div class="candidate-card" onclick="selectCandidate(this, 'None of the Above')">
-          <div class="candidate-avatar">✗</div>
-          <div class="candidate-name">None of the Above</div>
-          <div class="candidate-party">NOTA</div>
-        </div>
-      </div>
+      <div class="candidate-grid" id="candidate-grid"></div>
 
       <div id="vote-confirm" style="display:none;margin-top:24px;">
         <div class="security-notice">
           <span>✅</span>
           <span id="vote-confirm-text">Candidate selected. Review and confirm your vote. This action is final and irreversible.</span>
         </div>
+        <div id="vote-error" style="display:none;color:var(--crimson);font-size:12px;margin:8px 0;padding:8px;background:rgba(192,21,42,0.1);border-radius:4px;"></div>
         <div style="display:flex;gap:16px;margin-top:16px;">
           <button class="btn-primary" onclick="castVote()">🔒 Encrypt & Cast Vote</button>
           <button class="btn-secondary" onclick="clearVote()">Change Selection</button>
@@ -1303,38 +1299,51 @@
       <div class="form-section-title">Submit a Report</div>
       <div class="form-group" style="margin-bottom:16px;">
         <label class="form-label">Category</label>
-        <select class="form-input">
-          <option>Corruption / Bribery</option>
-          <option>Financial Fraud</option>
-          <option>Abuse of Power</option>
-          <option>Electoral Fraud</option>
-          <option>Civil Rights Violation</option>
-          <option>Environmental Crime</option>
-          <option>Other</option>
+        <select id="wb-category" class="form-input">
+          <option value="Corruption / Bribery">Corruption / Bribery</option>
+          <option value="Financial Fraud">Financial Fraud</option>
+          <option value="Abuse of Power">Abuse of Power</option>
+          <option value="Electoral Fraud">Electoral Fraud</option>
+          <option value="Civil Rights Violation">Civil Rights Violation</option>
+          <option value="Environmental Crime">Environmental Crime</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:16px;">
         <label class="form-label">Government Level</label>
-        <select class="form-input">
-          <option>Federal</option>
-          <option>Provincial</option>
-          <option>Municipal / Local</option>
-          <option>Security Forces</option>
-          <option>Judiciary</option>
+        <select id="wb-level" class="form-input">
+          <option value="federal">Federal</option>
+          <option value="province">Provincial</option>
+          <option value="municipality">Municipal / Local</option>
+          <option value="district">District</option>
+          <option value="ward">Ward</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:16px;">
-        <label class="form-label">Description (encrypted locally before sending)</label>
-        <textarea class="form-input" rows="6" placeholder="Describe the incident. Include dates, locations, individuals involved, amounts if applicable. Do NOT include information that could identify you."></textarea>
+        <label class="form-label">Description (min 20 characters)</label>
+        <textarea id="wb-description" class="form-input" rows="6" placeholder="Describe the incident. Include dates, locations, individuals involved, amounts if applicable. Do NOT include information that could identify you."></textarea>
       </div>
       <div class="form-group" style="margin-bottom:16px;">
         <label class="form-label">Evidence (Optional — files are stripped of metadata)</label>
-        <div class="card" style="text-align:center;padding:20px;cursor:pointer;border-style:dashed;" onclick="showToast('File uploaded. EXIF data stripped. Encrypted with AES-256.')">
-          <div style="font-size:32px;margin-bottom:8px;">📎</div>
-          <div class="card-desc" style="font-size:12px;">Click to upload. Images will have EXIF metadata removed. Documents will be sanitized.</div>
-        </div>
+        <input type="file" id="wb-file" class="form-input" accept=".pdf,.png,.jpg,.jpeg,.docx,.txt" style="padding:10px;">
       </div>
-      <button class="btn-primary" onclick="showToast('Report submitted anonymously. Your case ID: WB-2081-4891. Save this to check status via Tor.')">🔒 Submit Anonymously</button>
+      <div id="wb-error" style="display:none;color:var(--crimson);font-size:12px;margin-bottom:12px;padding:8px;background:rgba(192,21,42,0.1);border-radius:4px;"></div>
+      <div id="wb-success" style="display:none;margin-bottom:16px;padding:16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;">
+        <div style="color:var(--green);font-weight:600;margin-bottom:8px;">✓ Report submitted anonymously</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Your case token (save this!):</div>
+        <code id="wb-token" style="font-size:11px;word-break:break-all;color:var(--gold);background:var(--surface2);padding:8px;border-radius:4px;display:block;"></code>
+      </div>
+      <button id="wb-submit-btn" class="btn-primary" onclick="submitReport()">🔒 Submit Anonymously</button>
+
+      <div style="margin-top:32px;">
+        <div class="form-section-title">Track Existing Report</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Case Token (64 characters)</label>
+          <input type="text" id="wb-track-token" class="form-input" placeholder="Paste your case token here...">
+        </div>
+        <button class="btn-secondary" onclick="trackReport()">Track Report</button>
+        <div id="wb-track-result" style="display:none;margin-top:12px;padding:12px;background:var(--surface2);border-radius:6px;font-size:13px;"></div>
+      </div>
     </div>
 
     <div>
@@ -1736,62 +1745,407 @@
   </div>
 </div>
 
-<script>
-  let selectedCandidate = null;
 
+<script>
+  // ─────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────
+  const API = '';  // same-origin; Flask serves both
+  let AUTH = { token: null, refresh: null, citizen: null };
+  let selectedCandidate = null;  // { id, name, electionId }
+  let currentElectionId = null;
+
+  // ─────────────────────────────────────────────
+  // NAVIGATION
+  // ─────────────────────────────────────────────
   function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    const links = {
-      home: 0, registration: 1, dashboard: 2, voting: 3,
-      whistleblow: 4, architecture: 5, threat: 6, securityreport: 7
-    };
+    const links = { home:0, registration:1, dashboard:2, voting:3, whistleblow:4, architecture:5, threat:6, securityreport:7 };
     document.querySelectorAll('.nav-link')[links[id]]?.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (id === 'voting') loadElections();
+    if (id === 'dashboard') loadDashboard();
   }
 
-  function showToast(msg) {
+  function showToast(msg, isError) {
     const toast = document.getElementById('toast');
     document.getElementById('toast-msg').textContent = msg;
+    toast.style.background = isError ? 'rgba(192,21,42,0.95)' : 'rgba(34,197,94,0.95)';
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 4000);
   }
 
-  function showVotingBooth() {
-    const booth = document.getElementById('voting-booth');
-    booth.style.display = booth.style.display === 'none' ? 'block' : 'none';
-    if (booth.style.display === 'block') booth.scrollIntoView({ behavior: 'smooth' });
+  // ─────────────────────────────────────────────
+  // AUTH
+  // ─────────────────────────────────────────────
+  function openLoginModal() {
+    document.getElementById('login-modal').style.display = 'flex';
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('login-citizenship').value = '';
+    document.getElementById('login-password').value = '';
   }
 
-  function selectCandidate(el, name) {
+  function closeLoginModal() {
+    document.getElementById('login-modal').style.display = 'none';
+  }
+
+  async function doLogin() {
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    const citizenship = document.getElementById('login-citizenship').value.trim();
+    const password = document.getElementById('login-password').value;
+    errEl.style.display = 'none';
+
+    if (!citizenship || !password) { showLoginError('Please fill in all fields'); return; }
+
+    btn.textContent = 'Logging in...'; btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizenship_number: citizenship, password })
+      });
+      const data = await res.json();
+      if (!res.ok) { showLoginError(data.error || 'Login failed'); return; }
+
+      AUTH.token = data.access_token;
+      AUTH.refresh = data.refresh_token;
+      AUTH.citizen = data.citizen;
+      updateNavForLoggedIn();
+      closeLoginModal();
+      showToast(`Welcome, ${data.citizen.name}!`);
+    } catch (e) {
+      showLoginError('Connection error. Is the server running?');
+    } finally {
+      btn.textContent = 'Login'; btn.disabled = false;
+    }
+  }
+
+  function showLoginError(msg) {
+    const e = document.getElementById('login-error');
+    e.textContent = msg; e.style.display = 'block';
+  }
+
+  function logout() {
+    AUTH = { token: null, refresh: null, citizen: null };
+    document.getElementById('nav-auth').style.display = 'flex';
+    document.getElementById('nav-user').style.display = 'none';
+    showToast('Logged out successfully');
+  }
+
+  function updateNavForLoggedIn() {
+    document.getElementById('nav-auth').style.display = 'none';
+    const userEl = document.getElementById('nav-user');
+    userEl.style.display = 'flex';
+    document.getElementById('nav-username').textContent = AUTH.citizen.name;
+  }
+
+  function requireLogin(action) {
+    if (!AUTH.token) {
+      showToast('Please login first', true);
+      openLoginModal();
+      return false;
+    }
+    return true;
+  }
+
+  // ─────────────────────────────────────────────
+  // REGISTRATION
+  // ─────────────────────────────────────────────
+  async function submitRegistration() {
+    const btn = document.getElementById('reg-submit-btn');
+    const errEl = document.getElementById('reg-error');
+    const okEl = document.getElementById('reg-success');
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+
+    const payload = {
+      full_name_nep: document.getElementById('reg-name-nep').value.trim(),
+      full_name_eng: document.getElementById('reg-name-eng').value.trim(),
+      dob: document.getElementById('reg-dob').value,
+      gender: document.getElementById('reg-gender').value,
+      province: document.getElementById('reg-province').value,
+      district: document.getElementById('reg-district').value.trim(),
+      municipality: document.getElementById('reg-municipality').value.trim(),
+      ward: document.getElementById('reg-ward').value,
+      citizenship_number: document.getElementById('reg-citizenship').value.trim(),
+      issued_district: document.getElementById('reg-issued-district').value.trim(),
+      father_name: document.getElementById('reg-father').value.trim(),
+      mother_name: document.getElementById('reg-mother').value.trim(),
+      mobile: document.getElementById('reg-mobile').value.trim(),
+      password: document.getElementById('reg-password').value,
+    };
+
+    // Basic client-side validation
+    const missing = Object.entries(payload).filter(([k, v]) => 
+      !['father_name','mother_name'].includes(k) && !v
+    ).map(([k]) => k);
+    if (missing.length) {
+      showRegError('Please fill in: ' + missing.join(', ').replace(/_/g,' '));
+      return;
+    }
+
+    btn.textContent = 'Submitting...'; btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) { showRegError(data.error || 'Registration failed'); return; }
+      okEl.textContent = `✓ Registered successfully! Citizen ID: ${data.citizen_id}. You can now login.`;
+      okEl.style.display = 'block';
+      showToast('Registration successful! Please login.');
+    } catch (e) {
+      showRegError('Connection error. Is the server running?');
+    } finally {
+      btn.textContent = 'Submit Registration'; btn.disabled = false;
+    }
+  }
+
+  function showRegError(msg) {
+    const e = document.getElementById('reg-error');
+    e.textContent = msg; e.style.display = 'block';
+  }
+
+  // ─────────────────────────────────────────────
+  // DASHBOARD — load real services
+  // ─────────────────────────────────────────────
+  async function loadDashboard() {
+    if (!AUTH.token) return;
+    try {
+      const res = await fetch(`${API}/api/services/my-applications`, {
+        headers: { 'Authorization': `Bearer ${AUTH.token}` }
+      });
+      const apps = await res.json();
+      const pendingEl = document.querySelector('.metric-card:nth-child(2) .metric-value');
+      const pendingLbl = document.querySelector('.metric-card:nth-child(2) .metric-change');
+      if (pendingEl && apps.length !== undefined) {
+        const pending = apps.filter(a => a.status === 'Pending').length;
+        pendingEl.textContent = apps.length;
+        pendingLbl.textContent = `${pending} pending approval`;
+      }
+    } catch(e) {}
+  }
+
+  async function applyService(serviceId) {
+    if (!requireLogin()) return;
+    try {
+      const res = await fetch(`${API}/api/services/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${AUTH.token}` },
+        body: JSON.stringify({ service_id: serviceId })
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Application failed', true); return; }
+      showToast(`Application #${data.application_id} submitted!`);
+      loadDashboard();
+    } catch(e) {
+      showToast('Connection error', true);
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // ELECTIONS
+  // ─────────────────────────────────────────────
+  async function loadElections() {
+    const container = document.getElementById('elections-list');
+    container.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:40px;"><div style="font-size:28px">⏳</div><div class="card-desc">Loading elections...</div></div>';
+    try {
+      const res = await fetch(`${API}/api/elections`);
+      const elections = await res.json();
+      if (!elections.length) {
+        container.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="card-desc">No elections currently scheduled.</div></div>';
+        return;
+      }
+      const statusColors = { open: 'tag-red', upcoming: 'tag-gold', closed: 'tag-blue' };
+      const statusIcon = { open: '🗳️', upcoming: '🏛️', closed: '🔒' };
+      container.innerHTML = elections.map(e => `
+        <div class="card">
+          <div class="card-icon">${statusIcon[e.status] || '🗳️'}</div>
+          <div class="card-title">${e.name}</div>
+          <div class="card-desc">${e.type} — ${e.constituency || ''}</div>
+          <div class="card-tags">
+            <span class="tag ${statusColors[e.status] || 'tag-blue'}">${e.status.toUpperCase()}</span>
+            ${e.province ? `<span class="tag tag-blue">${e.province}</span>` : ''}
+          </div>
+          ${e.status === 'open' ? `<button class="btn-primary" style="margin-top:16px;width:100%;" onclick="openVotingBooth(${e.id}, '${e.name.replace(/'/g,"\\'")}', '${e.type} — ${(e.constituency||'').replace(/'/g,"\\'")}')">Vote Now</button>` : ''}
+          ${e.status === 'closed' ? `<button class="btn-secondary" style="margin-top:16px;width:100%;" onclick="showToast('Election closed — results will be published soon.')">View Results</button>` : ''}
+        </div>
+      `).join('');
+    } catch(e) {
+      container.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:24px;color:var(--crimson);">Failed to load elections. Check server connection.</div>';
+    }
+  }
+
+  async function openVotingBooth(electionId, name, meta) {
+    if (!requireLogin('vote')) return;
+    currentElectionId = electionId;
+    document.getElementById('booth-election-name').textContent = name;
+    document.getElementById('booth-election-meta').textContent = meta;
+    clearVote();
+    document.getElementById('voting-booth').style.display = 'block';
+    document.getElementById('voting-booth').scrollIntoView({ behavior: 'smooth' });
+
+    const grid = document.getElementById('candidate-grid');
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Loading candidates...</div>';
+
+    try {
+      const res = await fetch(`${API}/api/elections/${electionId}`);
+      const data = await res.json();
+      const avatars = ['👨','👩','👨','👩','👴','👵','🧑'];
+      grid.innerHTML = data.candidates.map((c, i) => `
+        <div class="candidate-card" onclick="selectCandidate(this, ${c.id}, '${c.name.replace(/'/g,"\\'")}')">
+          <div class="candidate-avatar">${avatars[i % avatars.length]}</div>
+          <div class="candidate-name">${c.name}</div>
+          <div class="candidate-party">${c.party}</div>
+          ${c.symbol ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">Symbol: ${c.symbol}</div>` : ''}
+        </div>
+      `).join('');
+    } catch(e) {
+      grid.innerHTML = '<div style="color:var(--crimson);text-align:center;">Failed to load candidates.</div>';
+    }
+  }
+
+  function selectCandidate(el, candidateId, name) {
     document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
-    selectedCandidate = name;
+    selectedCandidate = { id: candidateId, name };
     const confirm = document.getElementById('vote-confirm');
     confirm.style.display = 'block';
-    document.getElementById('vote-confirm-text').textContent = `You selected: "${name}". Your vote will be encrypted with the election public key before submission.`;
+    document.getElementById('vote-confirm-text').textContent = 
+      `You selected: "${name}". Your vote will be encrypted before submission. This action is final.`;
   }
 
   function clearVote() {
     document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('vote-confirm').style.display = 'none';
+    const vErr = document.getElementById('vote-error');
+    if (vErr) vErr.style.display = 'none';
     selectedCandidate = null;
   }
 
-  function castVote() {
+  async function castVote() {
     if (!selectedCandidate) return;
-    showToast(`✓ Ballot encrypted & cast for "${selectedCandidate}". Receipt: VR-${Math.random().toString(36).substr(2,8).toUpperCase()}`);
-    document.getElementById('voting-booth').style.display = 'none';
-    clearVote();
+    if (!requireLogin()) return;
+
+    const vErr = document.getElementById('vote-error');
+    vErr.style.display = 'none';
+    const btn = document.querySelector('#vote-confirm .btn-primary');
+    btn.textContent = 'Casting vote...'; btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/api/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${AUTH.token}` },
+        body: JSON.stringify({ candidate_id: selectedCandidate.id, election_id: currentElectionId })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        vErr.textContent = data.error || 'Vote failed';
+        vErr.style.display = 'block';
+        return;
+      }
+      document.getElementById('voting-booth').style.display = 'none';
+      clearVote();
+      const receipt = 'VR-' + Math.random().toString(36).substr(2,8).toUpperCase();
+      showToast(`✓ Ballot cast for "${selectedCandidate.name}". Receipt: ${receipt}`);
+      loadElections();
+    } catch(e) {
+      vErr.textContent = 'Connection error';
+      vErr.style.display = 'block';
+    } finally {
+      btn.textContent = '🔒 Encrypt & Cast Vote'; btn.disabled = false;
+    }
   }
 
-  // Animate stats counting
+  // ─────────────────────────────────────────────
+  // WHISTLEBLOWER
+  // ─────────────────────────────────────────────
+  async function submitReport() {
+    const btn = document.getElementById('wb-submit-btn');
+    const errEl = document.getElementById('wb-error');
+    const okEl = document.getElementById('wb-success');
+    errEl.style.display = 'none'; okEl.style.display = 'none';
+
+    const category = document.getElementById('wb-category').value;
+    const level = document.getElementById('wb-level').value;
+    const description = document.getElementById('wb-description').value.trim();
+    const fileInput = document.getElementById('wb-file');
+
+    if (!description || description.length < 20) {
+      errEl.textContent = 'Description must be at least 20 characters.';
+      errEl.style.display = 'block'; return;
+    }
+
+    btn.textContent = 'Submitting...'; btn.disabled = true;
+    const formData = new FormData();
+    formData.append('category', category);
+    formData.append('level', level);
+    formData.append('description', description);
+    if (fileInput.files[0]) formData.append('file', fileInput.files[0]);
+
+    try {
+      const res = await fetch(`${API}/api/report`, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || 'Submission failed'; errEl.style.display = 'block'; return; }
+      document.getElementById('wb-token').textContent = data.case_token;
+      okEl.style.display = 'block';
+      document.getElementById('wb-description').value = '';
+      showToast('Report submitted anonymously ✓');
+    } catch(e) {
+      errEl.textContent = 'Connection error. Is the server running?';
+      errEl.style.display = 'block';
+    } finally {
+      btn.textContent = '🔒 Submit Anonymously'; btn.disabled = false;
+    }
+  }
+
+  async function trackReport() {
+    const token = document.getElementById('wb-track-token').value.trim();
+    const resultEl = document.getElementById('wb-track-result');
+    resultEl.style.display = 'none';
+
+    if (!token || token.length !== 64) {
+      showToast('Token must be exactly 64 characters.', true); return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/report/track?token=${token}`);
+      const data = await res.json();
+      const statusColors = { received: 'var(--gold)', investigating: 'var(--orange)', resolved: 'var(--green)' };
+      if (!res.ok) {
+        resultEl.innerHTML = `<span style="color:var(--crimson);">${data.error}</span>`;
+      } else {
+        resultEl.innerHTML = `
+          <div style="margin-bottom:8px;"><strong>Category:</strong> ${data.category}</div>
+          <div style="margin-bottom:8px;"><strong>Status:</strong> <span style="color:${statusColors[data.status]||'var(--white)'};">${data.status.toUpperCase()}</span></div>
+          <div style="font-size:11px;color:var(--muted);">Submitted: ${new Date(data.submitted_at).toLocaleString()}</div>
+        `;
+      }
+      resultEl.style.display = 'block';
+    } catch(e) {
+      resultEl.innerHTML = '<span style="color:var(--crimson);">Connection error</span>';
+      resultEl.style.display = 'block';
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    // Stagger card animations
-    document.querySelectorAll('.card').forEach((card, i) => {
-      card.style.animationDelay = `${i * 0.05}s`;
+    // Enter key for login
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
     });
+    // Close modal on backdrop click
+    document.getElementById('login-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeLoginModal();
+    });
+    // Load elections on initial visit
+    loadElections();
   });
 </script>
 </body>
